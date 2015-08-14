@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>水果机器人技术研究</title>
+    <description>安卓开发者，这是我的私人博客，分享自己的安卓开发经验。这里的任何观点保留个人意见，欢迎联系我讨论技术问题。You are welcomed to contact me to discuss android development topics. (English and/or Chinese)
+</description>
+    <link>http://henryzx.github.io/</link>
+    <atom:link href="http://henryzx.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Fri, 14 Aug 2015 18:45:43 +0800</pubDate>
+    <lastBuildDate>Fri, 14 Aug 2015 18:45:43 +0800</lastBuildDate>
+    <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>官方 Android 性能优化典范总结!</title>
+        <description>&lt;h1 id=&quot;android-&quot;&gt;官方 Android 性能优化典范总结&lt;/h1&gt;
+
+&lt;h3 id=&quot;section&quot;&gt;界面优化&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;16 ms 帧规定，可使用 GPU Profile 观察&lt;/li&gt;
+  &lt;li&gt;渲染的流程： Measure -&amp;gt; Layout -&amp;gt; Record Display List -&amp;gt; Execute Display List&lt;/li&gt;
+  &lt;li&gt;alpha 渐变动画使用 setLayerType(View.LAYER_TYPE_HARDWARE, null) ViewPropertyAnimator.alpha.withLayer() 避免 2-pass 渲染, View.hasOverlappingRendering() {return false} 也可以&lt;/li&gt;
+  &lt;li&gt;RelativeLayout 使用 alignTop/alignBelow，LinearLayout 设置 measureWithLargestChild() 都会导致 2-pass layout, @see Double Layout Taxation&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;bitmap-&quot;&gt;Bitmap 优化&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用更小的 pixel 格式 替代 RGBA_8888，如 RGB_565 或 RGBA_4444&lt;/li&gt;
+  &lt;li&gt;使用索引颜色的 PNG 格式 (scriptPNG 工具，Photoshop 导出WEB格式)&lt;/li&gt;
+  &lt;li&gt;in-factor-of-2 缩放 Bitmap 时可直接用 BitmapOptions.inSampleSize = 比例，例如 4 (1/4 大小)，避免OOM&lt;/li&gt;
+  &lt;li&gt;查看资源图片大小使用 inJustDecodeBounds&lt;/li&gt;
+  &lt;li&gt;复用 bitmap 内存可使用 inBitmap 属性 (要求大小要一致)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;内存优化&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;内存抖动、内存溢出影响 GC 效率，导致丢帧&lt;/li&gt;
+  &lt;li&gt;Memory Profile 工具
+    &lt;ul&gt;
+      &lt;li&gt;Memory Monitor：查看整个app所占用的内存，以及发生GC的时刻，短时间内发生大量的GC操作是一个危险的信号。&lt;/li&gt;
+      &lt;li&gt;Allocation Tracker：使用此工具来追踪内存的分配&lt;/li&gt;
+      &lt;li&gt;Heap Tool：查看当前内存快照，便于对比分析哪些对象有可能是泄漏了的&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Object Pool 解决大量小对象分配导致的内存抖动&lt;/li&gt;
+  &lt;li&gt;WeakHashMap 会将内存用尽后调用特殊方法后释放内存，HashMap&amp;lt;key,WeakRef&lt;value&gt;&amp;gt; 会更及时释放 (Demo 验证过)&lt;/value&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;java-&quot;&gt;Java 优化&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用 for(int i=0, c={size}; i&amp;lt;c; i++) 提高2倍+迭代效率&lt;/li&gt;
+  &lt;li&gt;活用 LRU Cache (Least Recently Use)&lt;/li&gt;
+  &lt;li&gt;Profile 工具: Battery History Tool&lt;/li&gt;
+  &lt;li&gt;需要遍历速度较高时使用 ArrayMap，减少创建对象数量&lt;/li&gt;
+  &lt;li&gt;键类型为 primitive 时，为避免 Auto-boxing，使用 Sparse*Map&lt;/li&gt;
+  &lt;li&gt;WeakHashMap &lt;strong&gt;并不是对 value&lt;/strong&gt; ，而是对 key 进行弱引用，不能自动回收内存，慎重使用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;网络同步&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;后台同步网络活用 Prefetch, batch&lt;/li&gt;
+  &lt;li&gt;prefetch 例子：加载 listView 图片时，预加载数据列表内的图片，改善滑动列表时的体验&lt;/li&gt;
+  &lt;li&gt;计算View大小，并尝试获取服务端 resized 的图片&lt;/li&gt;
+  &lt;li&gt;使用 Gzip 压缩预优化，FlatBuffers，图片使用 WebP 或 索引颜色PNG&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;section-3&quot;&gt;电量消耗&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用 JobScheduler API, AlarmManager.setInexact*()&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Sat, 15 Aug 2015 02:07:20 +0800</pubDate>
+        <link>http://henryzx.github.io/android/tips/2015/08/15/official-android-tips.html</link>
+        <guid isPermaLink="true">http://henryzx.github.io/android/tips/2015/08/15/official-android-tips.html</guid>
+        
+        
+        <category>android</category>
+        
+        <category>tips</category>
+        
+      </item>
+    
+  </channel>
+</rss>

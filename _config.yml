@@ -1,0 +1,13 @@
+# Site settings
+title: 水果机器人技术研究
+email: zhengxiao1127@foxmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  安卓开发者，这是我的私人博客，分享自己的安卓开发经验。这里的任何观点保留个人意见，欢迎联系我讨论技术问题。You are welcomed to contact me to discuss android development topics. (English and/or Chinese)
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://henryzx.github.io" # the base hostname & protocol for your site
+#twitter_username: jekyllrb
+github_username:  henryzx
+
+# Build settings
+markdown: kramdown
+#source: _source
